@@ -1,12 +1,11 @@
 import { SlashCommandBuilder } from 'discord.js';
-
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('list')
-		.setDescription('Sends list of players currently online')
+		.setName('stop')
+		.setDescription('Stops server')
 		.addStringOption(option =>
 			option.setName('server')
-				.setDescription('Players on server')
+				.setDescription('Server to stop')
 				.setRequired(true)
 				.addChoices(
 					{ name: 'SMP', value: 'smp' },
@@ -15,7 +14,6 @@ module.exports = {
 				)),
 				async execute(interaction: any) {
 					let serverType: number;
-					let amountOfPlayers: number = -1;
 					const option: string = interaction.options.getString('server');
 					switch(option){
 						case 'smp':
@@ -29,6 +27,6 @@ module.exports = {
 							break;
 						default: serverType = -1;
 					}
-					await interaction.reply(`Players on ${option}: ${amountOfPlayers}`);
+					await interaction.reply(`Stopping server: ${option}`);
 				},
 };
