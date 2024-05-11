@@ -1,4 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { changePermissionForPlayer } from '../../rcon/rcon';
+const { smpIp, cmpIp, cmp2Ip, smpPassword, cmpPassword, cmp2Password, rconPassword, smpPort, cmpPort, cmp2Port, rconPort } = require('../../../config.json');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('deop')
@@ -18,18 +20,29 @@ module.exports = {
 					)
 				),
 				async execute(interaction: any) {
-					let serverType: number;
+					let serverType: string;
+					let port: number;
+					let password: string;
 					const option: string = interaction.options.getString('name');
 					const server: string = interaction.options.getString('at');
 					switch(server){
 						case 'cmp':
-							serverType = 10;
+							serverType = cmpIp;
+							port = cmpPort;
+							password = cmpPassword;
 							break;
 						case 'cmp2':
-							serverType = 11;
+							serverType = cmp2Ip;
+							port = cmp2Port;
+							password = cmp2Password;
 							break;
-						default: serverType = -1;
+						default: {
+							serverType = '127.0.0.1';
+							port = rconPort;
+							password = rconPassword;
+						}
 					}
-					await interaction.reply(`Took away **${option}** op perms at **${server}**`);
+					const data = changePermissionForPlayer(serverType, port, password, option, false);
+					await interaction.reply(`Made **${option}** no longer operator at **${server}**`);
 				},
 };
