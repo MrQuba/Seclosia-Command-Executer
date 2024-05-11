@@ -12,7 +12,8 @@ export const runRconCommand = async (host: string, rconPort: number, rconPasswor
   return data;
 };
 export const managePlayer = async(host: string, rconPort: number, rconPasswd: string, name: string, action: string, other?: string) => {
-  const command: string = 'player ' + name + ' ' + action + ' ' + other;
+  const command: string = 'player ' + name + ' ' + action;
+  console.log(command);
   const response = await runRconCommand(host, rconPort, rconPasswd, command);
 
   return response;
