@@ -1,122 +1,28 @@
-import {
-  APIApplicationCommandOptionChoice,
-  SlashCommandBuilder,
-  SlashCommandStringOption,
-  SlashCommandSubcommandBuilder
-} from 'discord.js'
+import { SlashCommandBuilder } from 'discord.js'
 import { managePlayer } from '../../rcon/rcon'
-const { cmpIp, cmpPassword, cmpPort, smpIp, smpPassword, smpPort } = require('../../../config.json')
-function createSimpleSubcommand(
-  subcommandName: string,
-  subcommandDescription: string
-) {
-  return new SlashCommandSubcommandBuilder()
-    .setName(subcommandName)
-    .setDescription(subcommandDescription)
-    .addStringOption((name) =>
-      name
-        .setName('name')
-        .setDescription('Name of player to manage')
-        .setRequired(true)
-    )
-    .addStringOption(createStringOptionWithChoices('server', 'Server to execute command at', true, ...server))
-}
-function createIntervalSubcommand(
-  subcommandName: string,
-  subcommandDescription: string
-) {
-  return createSimpleSubcommand(subcommandName, subcommandDescription)
-    .addStringOption((args) =>
-      args
-        .setName('arguments')
-        .setDescription('Additional arguments')
-        .setRequired(true)
-        .addChoices(
-          { name: 'Once', value: 'once' },
-          { name: 'Continuous', value: 'continuous' },
-          { name: 'Interval', value: 'interval' }
-        )
-    )
-    .addStringOption((interval) =>
-      interval
-        .setName('interval')
-        .setDescription(
-          'Interval (in ticks), only required for Interval option'
-        )
-        .setRequired(false)
-    )
-}
-function createDropSubcommand(
-  subcommandName: string,
-  subcommandDescription: string
-) {
-  return createSimpleSubcommand(subcommandName, subcommandDescription)
-    .addStringOption((args) =>
-      args
-        .setName('arguments')
-        .setDescription('Additional arguments')
-        .setRequired(true)
-        .addChoices(
-          { name: 'All', value: 'all' },
-          { name: 'Continuous', value: 'continuous' },
-          { name: 'Interval', value: 'interval' },
-          { name: 'Mainhand', value: 'mainhand' },
-          { name: 'Offhand', value: 'offhand' },
-          { name: 'Once', value: 'once' }
-        )
-    )
-    .addStringOption((interval) =>
-      interval
-        .setName('interval')
-        .setDescription(
-          'Interval (in ticks), only required for Interval option'
-        )
-        .setRequired(false)
-    )
-}
-type choiceArray = APIApplicationCommandOptionChoice<string>[]
-function createChoiceSubcommand(
-  subcommandName: string,
-  subcommandDescription: string,
-  ...choices: choiceArray
-) {
-  return createSimpleSubcommand(subcommandName, subcommandDescription)
-    .addStringOption((args) =>
-      args
-        .setName('arguments')
-        .setDescription('Additional arguments')
-        .setRequired(false)
-        .addChoices(...choices)
-    )
-}
-function createStringOption(
-  name: string,
-  description: string,
-  required: boolean
-) {
-  return new SlashCommandStringOption()
-    .setName(name)
-    .setDescription(description)
-    .setRequired(required)
-}
-function createStringOptionWithChoices(
-  name: string,
-  description: string,
-  required: boolean,
-  ...choices: choiceArray
-) {
-  return createStringOption(name, description, required).addChoices(...choices)
-}
-const turnChoices: choiceArray = [
-  { name: 'Back', value: 'back' },
-  { name: 'Left', value: 'left' },
-  { name: 'Right', value: 'right' }
-]
-const moveChoices: choiceArray = [
-  { name: 'Backward', value: 'backward' },
-  { name: 'Forward', value: 'forward' },
-  { name: 'Left', value: 'left' },
-  { name: 'Right', value: 'right' }
+import {
+  choiceArray,
+  dimensions,
+  gamemodes,
+  createStringOptionWithChoices,
+  createStringOption,
+  createChoiceSubcommand,
+  createDropSubcommand,
+  createIntervalSubcommand,
+  createSimpleSubcommand
+} from '../../utils/CommandUtils'
+const {
+  cmpIp,
+  cmpPassword,
+  cmpPort,
+  smpIp,
+  smpPassword,
+  smpPort
+} = require('../../../config.json')
+
+const spawnSubs: choiceArray = [
+  { name: 'At', value: 'at' },
+  { name: 'In', value: 'in' }
 ]
 const lookChoices: choiceArray = [
   { name: 'At', value: 'at' },
@@ -127,24 +33,16 @@ const lookChoices: choiceArray = [
   { name: 'up', value: 'up' },
   { name: 'west', value: 'west' }
 ]
-const gamemodes: choiceArray = [
-  { name: 'Creative', value: 'creative' },
-  { name: 'Survival', value: 'survival' },
-  { name: 'Spectator', value: 'spectator' }
+const turnChoices: choiceArray = [
+  { name: 'Back', value: 'back' },
+  { name: 'Left', value: 'left' },
+  { name: 'Right', value: 'right' }
 ]
-const spawnSubs: choiceArray = [
-  { name: 'At', value: 'at' },
-  { name: 'In', value: 'in' }
-]
-const server: choiceArray = [
-  { name: 'SMP', value: 'smp' },
-  { name: 'CMP', value: 'smp' }
-]
-
-const dimensions: choiceArray = [
-  { name: 'Overworld', value: 'minecraft:overworld' },
-  { name: 'Nether', value: 'minecraft:the_nether' },
-  { name: 'End', value: 'minecraft:the_end' }
+const moveChoices: choiceArray = [
+  { name: 'Backward', value: 'backward' },
+  { name: 'Forward', value: 'forward' },
+  { name: 'Left', value: 'left' },
+  { name: 'Right', value: 'right' }
 ]
 module.exports = {
   data: new SlashCommandBuilder()
@@ -195,21 +93,39 @@ module.exports = {
       )
     )
     .addSubcommand(
-      createSimpleSubcommand('spawn', 'Spawns player').addStringOption(
-        createStringOption(
-          'at',
-          'Coordinates to spawn player at',
-          true
-        ))
-      .addStringOption(createStringOption('facing', 'Direction (x and z coordinate) player is going to face', true))
-      .addStringOption(createStringOptionWithChoices('in', 'Dimension to spawn player in', true, ...dimensions))
-      .addStringOption(createStringOptionWithChoices('in2', 'Gamemode to spawn player in', true, ...gamemodes))
+      createSimpleSubcommand('spawn', 'Spawns player')
+        .addStringOption(
+          createStringOption('at', 'Coordinates to spawn player at', true)
+        )
+        .addStringOption(
+          createStringOption(
+            'facing',
+            'Direction (x and z coordinate) player is going to face',
+            true
+          )
+        )
+        .addStringOption(
+          createStringOptionWithChoices(
+            'in',
+            'Dimension to spawn player in',
+            true,
+            ...dimensions
+          )
+        )
+        .addStringOption(
+          createStringOptionWithChoices(
+            'in2',
+            'Gamemode to spawn player in',
+            true,
+            ...gamemodes
+          )
+        )
     ),
   async execute(interaction: any) {
-    const isSMP: boolean = interaction.options.getString('server') == 'smp';
-    const serverType: string = isSMP ? smpIp : cmpIp;
-    const password: string =isSMP ? smpPassword :cmpPassword
-    const port: number = isSMP ? smpPort :cmpPort
+    const isSMP: boolean = interaction.options.getString('server') == 'smp'
+    const serverType: string = isSMP ? smpIp : cmpIp
+    const password: string = isSMP ? smpPassword : cmpPassword
+    const port: number = isSMP ? smpPort : cmpPort
     const simpleCommands = new Set<string>([
       'stop',
       'kill',
@@ -278,7 +194,15 @@ module.exports = {
         managePlayer(serverType, port, password, name, subcommand, args)
         break
       case 'spawn':
-        args = 'at ' + interaction.options.getString('at') + ' facing ' + interaction.options.getString('facing') + ' in ' + interaction.options.getString('in') + ' in ' + interaction.options.getString('in2')
+        args =
+          'at ' +
+          interaction.options.getString('at') +
+          ' facing ' +
+          interaction.options.getString('facing') +
+          ' in ' +
+          interaction.options.getString('in') +
+          ' in ' +
+          interaction.options.getString('in2')
         managePlayer(serverType, port, password, name, subcommand, args)
         break
       default: {
