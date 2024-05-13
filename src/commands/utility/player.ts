@@ -5,7 +5,7 @@ import {
   SlashCommandSubcommandBuilder
 } from 'discord.js'
 import { managePlayer } from '../../rcon/rcon'
-const { cmpIp, cmpPassword, cmpPort } = require('../../../config.json')
+const { cmpIp, cmpPassword, cmpPort, smpIp, smpPassword, smpPort } = require('../../../config.json')
 function createSimpleSubcommand(
   subcommandName: string,
   subcommandDescription: string
@@ -19,20 +19,13 @@ function createSimpleSubcommand(
         .setDescription('Name of player to manage')
         .setRequired(true)
     )
+    .addStringOption(createStringOptionWithChoices('server', 'Server to execute command at', true, ...server))
 }
 function createIntervalSubcommand(
   subcommandName: string,
   subcommandDescription: string
 ) {
-  return new SlashCommandSubcommandBuilder()
-    .setName(subcommandName)
-    .setDescription(subcommandDescription)
-    .addStringOption((name) =>
-      name
-        .setName('name')
-        .setDescription('Name of player to manage')
-        .setRequired(true)
-    )
+  return createSimpleSubcommand(subcommandName, subcommandDescription)
     .addStringOption((args) =>
       args
         .setName('arguments')
@@ -57,15 +50,7 @@ function createDropSubcommand(
   subcommandName: string,
   subcommandDescription: string
 ) {
-  return new SlashCommandSubcommandBuilder()
-    .setName(subcommandName)
-    .setDescription(subcommandDescription)
-    .addStringOption((name) =>
-      name
-        .setName('name')
-        .setDescription('Name of player to manage')
-        .setRequired(true)
-    )
+  return createSimpleSubcommand(subcommandName, subcommandDescription)
     .addStringOption((args) =>
       args
         .setName('arguments')
@@ -95,15 +80,7 @@ function createChoiceSubcommand(
   subcommandDescription: string,
   ...choices: choiceArray
 ) {
-  return new SlashCommandSubcommandBuilder()
-    .setName(subcommandName)
-    .setDescription(subcommandDescription)
-    .addStringOption((name) =>
-      name
-        .setName('name')
-        .setDescription('Name of player to manage')
-        .setRequired(true)
-    )
+  return createSimpleSubcommand(subcommandName, subcommandDescription)
     .addStringOption((args) =>
       args
         .setName('arguments')
@@ -158,6 +135,10 @@ const gamemodes: choiceArray = [
 const spawnSubs: choiceArray = [
   { name: 'At', value: 'at' },
   { name: 'In', value: 'in' }
+]
+const server: choiceArray = [
+  { name: 'SMP', value: 'smp' },
+  { name: 'CMP', value: 'smp' }
 ]
 
 const dimensions: choiceArray = [
@@ -225,9 +206,10 @@ module.exports = {
       .addStringOption(createStringOptionWithChoices('in2', 'Gamemode to spawn player in', true, ...gamemodes))
     ),
   async execute(interaction: any) {
-    const serverType: string = cmpIp
-    const password: string = cmpPassword
-    const port: number = cmpPort
+    const isSMP: boolean = interaction.options.getString('server') == 'smp';
+    const serverType: string = isSMP ? smpIp : cmpIp;
+    const password: string =isSMP ? smpPassword :cmpPassword
+    const port: number = isSMP ? smpPort :cmpPort
     const simpleCommands = new Set<string>([
       'stop',
       'kill',
@@ -326,7 +308,7 @@ module.exports = {
       interaction.reply(
         `${name} ${subcommand} ${args != undefined ? args : ''} ${
           interval != undefined ? interval : ''
-        }`
+        } at ${interaction.options.getString('server')}`
       )
   }
 }
