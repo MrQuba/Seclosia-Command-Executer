@@ -1,6 +1,7 @@
 import {
   APIApplicationCommandOptionChoice,
   SlashCommandBuilder,
+  SlashCommandStringOption,
   SlashCommandSubcommandBuilder
 } from 'discord.js'
 import { managePlayer } from '../../rcon/rcon'
@@ -111,6 +112,24 @@ function createChoiceSubcommand(
         .addChoices(...choices)
     )
 }
+function createStringOption(
+  name: string,
+  description: string,
+  required: boolean
+) {
+  return new SlashCommandStringOption()
+    .setName(name)
+    .setDescription(description)
+    .setRequired(required)
+}
+function createStringOptionWithChoices(
+  name: string,
+  description: string,
+  required: boolean,
+  ...choices: choiceArray
+) {
+  return createStringOption(name, description, required).addChoices(...choices)
+}
 const turnChoices: choiceArray = [
   { name: 'Back', value: 'back' },
   { name: 'Left', value: 'left' },
@@ -120,8 +139,9 @@ const moveChoices: choiceArray = [
   { name: 'Backward', value: 'backward' },
   { name: 'Forward', value: 'forward' },
   { name: 'Left', value: 'left' },
-  { name: 'Right', value: 'right' }]
-const lookChoices: choiceArray =[
+  { name: 'Right', value: 'right' }
+]
+const lookChoices: choiceArray = [
   { name: 'At', value: 'at' },
   { name: 'down', value: 'down' },
   { name: 'east', value: 'east' },
@@ -130,20 +150,39 @@ const lookChoices: choiceArray =[
   { name: 'up', value: 'up' },
   { name: 'west', value: 'west' }
 ]
+const gamemodes: choiceArray = [
+  { name: 'Creative', value: 'creative' },
+  { name: 'Survival', value: 'survival' },
+  { name: 'Spectator', value: 'spectator' }
+]
+const spawnSubs: choiceArray = [
+  { name: 'At', value: 'at' },
+  { name: 'In', value: 'in' }
+]
+
+const dimensions: choiceArray = [
+  { name: 'Overworld', value: 'minecraft:overworld' },
+  { name: 'Nether', value: 'minecraft:the_nether' },
+  { name: 'End', value: 'minecraft:the_end' }
+]
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('player')
     .setDescription('Manages players on CMP')
-    .addSubcommand(createSimpleSubcommand('stop', 'Stops actions of the player'))
+    .addSubcommand(
+      createSimpleSubcommand('stop', 'Stops actions of the player')
+    )
     .addSubcommand(createSimpleSubcommand('kill', 'Kills player'))
-    .addSubcommand( createIntervalSubcommand('swaphands', 'Swaps hands of the player'))
-    .addSubcommand(createSimpleSubcommand('hotbar', 'Changes current slot of the player')
-        .addIntegerOption((slot) =>
-          slot
-            .setName('slot')
-            .setDescription('Slot to change')
-            .setRequired(true)
-        )
+    .addSubcommand(
+      createIntervalSubcommand('swaphands', 'Swaps hands of the player')
+    )
+    .addSubcommand(
+      createSimpleSubcommand(
+        'hotbar',
+        'Changes current slot of the player'
+      ).addIntegerOption((slot) =>
+        slot.setName('slot').setDescription('Slot to change').setRequired(true)
+      )
     )
     .addSubcommand(createDropSubcommand('dropstack', 'Drops stack of items'))
     .addSubcommand(createDropSubcommand('drop', 'Drops item'))
@@ -156,15 +195,34 @@ module.exports = {
     .addSubcommand(createIntervalSubcommand('use', 'Makes player use item'))
     .addSubcommand(createIntervalSubcommand('jump', 'Makes player jump'))
     .addSubcommand(createIntervalSubcommand('attack', 'Makes player attack'))
-    .addSubcommand(createChoiceSubcommand('turn', 'Turns player', ...turnChoices))
-    .addSubcommand(createChoiceSubcommand('move', 'Moves player', ...moveChoices))
-    .addSubcommand(createChoiceSubcommand('look', 'Makes player look in specified direction', ...lookChoices)
-        .addStringOption((coordinates) =>
-          coordinates
-            .setName('coordinates')
-            .setDescription('Coordinates to look at')
-            .setRequired(false)
-        )
+    .addSubcommand(
+      createChoiceSubcommand('turn', 'Turns player', ...turnChoices)
+    )
+    .addSubcommand(
+      createChoiceSubcommand('move', 'Moves player', ...moveChoices)
+    )
+    .addSubcommand(
+      createChoiceSubcommand(
+        'look',
+        'Makes player look in specified direction',
+        ...lookChoices
+      ).addStringOption((coordinates) =>
+        coordinates
+          .setName('coordinates')
+          .setDescription('Coordinates to look at')
+          .setRequired(false)
+      )
+    )
+    .addSubcommand(
+      createSimpleSubcommand('spawn', 'Spawns player').addStringOption(
+        createStringOption(
+          'at',
+          'Coordinates to spawn player at',
+          true
+        ))
+      .addStringOption(createStringOption('facing', 'Direction (x and z coordinate) player is going to face', true))
+      .addStringOption(createStringOptionWithChoices('in', 'Dimension to spawn player in', true, ...dimensions))
+      .addStringOption(createStringOptionWithChoices('in2', 'Gamemode to spawn player in', true, ...gamemodes))
     ),
   async execute(interaction: any) {
     const serverType: string = cmpIp
@@ -235,6 +293,10 @@ module.exports = {
         const coordinates: string = interaction.options.getString('coordinates')
         if (args == 'at')
           args = args + ' ' + (coordinates == undefined ? '' : coordinates)
+        managePlayer(serverType, port, password, name, subcommand, args)
+        break
+      case 'spawn':
+        args = 'at ' + interaction.options.getString('at') + ' facing ' + interaction.options.getString('facing') + ' in ' + interaction.options.getString('in') + ' in ' + interaction.options.getString('in2')
         managePlayer(serverType, port, password, name, subcommand, args)
         break
       default: {

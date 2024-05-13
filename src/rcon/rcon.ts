@@ -1,4 +1,4 @@
-import { RCON } from "minecraft-server-util";
+import { RCON } from 'minecraft-server-util'
 // source https://github.com/defnot001/KiwiTech-Bot/blob/main/src/util/rcon.ts
 export const runRconCommand = async (
   host: string,
@@ -6,16 +6,16 @@ export const runRconCommand = async (
   rconPassword: string,
   command: string
 ) => {
-  const rconClient: RCON = new RCON();
+  const rconClient: RCON = new RCON()
 
-  await rconClient.connect(host, rconPort);
-  await rconClient.login(rconPassword);
+  await rconClient.connect(host, rconPort)
+  await rconClient.login(rconPassword)
 
-  const data = await rconClient.execute(command);
+  const data = await rconClient.execute(command)
 
-  await rconClient.close();
-  return data;
-};
+  await rconClient.close()
+  return data
+}
 export const managePlayer = async (
   host: string,
   rconPort: number,
@@ -24,25 +24,24 @@ export const managePlayer = async (
   action: string,
   other?: string
 ) => {
-  let command: string;
-  if (other == undefined) command = "player " + name + " " + action;
-  else command = "player " + name + " " + action + " " + other;
+  let command: string
+  if (other == undefined) command = 'player ' + name + ' ' + action
+  else command = 'player ' + name + ' ' + action + ' ' + other
+  const response = await runRconCommand(host, rconPort, rconPasswd, command)
 
-  const response = await runRconCommand(host, rconPort, rconPasswd, command);
-
-  return response;
-};
+  return response
+}
 export const getList = async (
   host: string,
   rconPort: number,
   rconPasswd: string
 ) => {
-  const response = await runRconCommand(host, rconPort, rconPasswd, "list");
+  const response = await runRconCommand(host, rconPort, rconPasswd, 'list')
 
   return response
-    .split(", ")
-    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-};
+    .split(', ')
+    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+}
 export const changePermissionForPlayer = async (
   host: string,
   rconPort: number,
@@ -50,10 +49,10 @@ export const changePermissionForPlayer = async (
   name: string,
   grant: boolean
 ) => {
-  const command: string = grant ? "op " + name : "deop " + name;
-  const response = await runRconCommand(host, rconPort, rconPasswd, command);
-  return response;
-};
+  const command: string = grant ? 'op ' + name : 'deop ' + name
+  const response = await runRconCommand(host, rconPort, rconPasswd, command)
+  return response
+}
 export const modifyWhitelist = async (
   host: string,
   rconPort: number,
@@ -61,11 +60,11 @@ export const modifyWhitelist = async (
   name: string,
   add: boolean
 ) => {
-  let command: string = "whitelist ";
-  command += add ? "add " + name : "remove " + name;
-  const response = await runRconCommand(host, rconPort, rconPasswd, command);
-  return response;
-};
+  let command: string = 'whitelist '
+  command += add ? 'add ' + name : 'remove ' + name
+  const response = await runRconCommand(host, rconPort, rconPasswd, command)
+  return response
+}
 export const getWhitelist = async (
   host: string,
   rconPort: number,
@@ -75,7 +74,7 @@ export const getWhitelist = async (
     host,
     rconPort,
     rconPasswd,
-    "whitelist list"
-  );
-  return response;
-};
+    'whitelist list'
+  )
+  return response
+}
