@@ -1,6 +1,11 @@
 {
+  "semi": false,
+  "singleQuote": true,
+  "arrowParens": "always",
+  "printWidth": 80,
   "tabWidth": 2,
   "useTabs": false,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": false
+  "bracketSpacing": true,
+  "arrowFunctionParentheses": "avoid",
+  "trailingComma": "none"
 }
