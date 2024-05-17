@@ -13,7 +13,6 @@ export const runRconCommand = async (
 
   const data = await rconClient.execute(command)
   await rconClient.close()
-  console.log(data)
   return data
 }
 export const managePlayer = async (
