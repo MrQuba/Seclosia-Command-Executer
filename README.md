@@ -1,3 +1,8 @@
+# How to start?
+just run
+```
+run.bat
+```
 # How to configure?
 In main folder of bot create file:
 ```
