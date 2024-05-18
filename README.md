@@ -1,7 +1,7 @@
 # How to start?
 just run
 ```
-run.bat
+run.bat.lnk
 ```
 # How to configure?
 In main folder of bot create file:
