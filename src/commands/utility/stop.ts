@@ -1,10 +1,11 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { runRconCommand } from '../../rcon/rcon';
 const { smpIp, cmpIp, cmp2Ip, smpPassword, cmpPassword, cmp2Password, rconPassword, smpPort, cmpPort, cmp2Port, rconPort } = require('../../../config.json');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('stop')
 		.setDescription('Stops server')
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.addStringOption(option =>
 			option.setName('server')
 				.setDescription('Server to stop')

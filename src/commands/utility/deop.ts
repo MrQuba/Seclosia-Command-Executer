@@ -1,10 +1,11 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { changePermissionForPlayer } from '../../rcon/rcon';
-const { smpIp, cmpIp, cmp2Ip, smpPassword, cmpPassword, cmp2Password, rconPassword, smpPort, cmpPort, cmp2Port, rconPort } = require('../../../config.json');
+const { cmpIp, cmp2Ip, cmpPassword, cmp2Password, rconPassword, cmpPort, cmp2Port, rconPort } = require('../../../config.json');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('deop')
 		.setDescription('Takes away operator permissions at specified server')
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.addStringOption(option =>
 			option.setName('name')
 				.setDescription('Name of player to take away perms from')
@@ -42,7 +43,6 @@ module.exports = {
 							password = rconPassword;
 						}
 					}
-					const data = changePermissionForPlayer(serverType, port, password, option, false);
 					await interaction.reply(`Made **${option}** no longer operator at **${server}**`);
 				},
 };

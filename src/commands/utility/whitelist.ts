@@ -1,10 +1,11 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { getWhitelist, modifyWhitelist } from '../../rcon/rcon';
 const { smpIp, cmpIp, cmp2Ip, smpPassword, cmpPassword, cmp2Password, rconPassword, smpPort, cmpPort, cmp2Port, rconPort } = require('../../../config.json');
 module.exports = {
 	 data: new SlashCommandBuilder()
 	.setName('whitelist')
 	.setDescription('Display or modify whitelist')
+	.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 	.addSubcommand(subcommand =>
 		subcommand
 			.setName('list')

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { getList } from '../../rcon/rcon';
-const { smpIp, cmpIp, cmp2Ip, smpPassword, cmpPassword, cmp2Password, rconPassword, smpPort, cmpPort, cmp2Port, rconPort } = require('../../../config.json');
+const { smpIp, cmpIp, cmp2Ip, smpPassword, cmpPassword, cmp2Password, rconPassword, smpPort, cmpPort, cmp2Port, rconPort, memberRoleId } = require('../../../config.json');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('list')
@@ -15,6 +15,9 @@ module.exports = {
 					{ name: 'CMP2', value: 'cmp2' },
 				)),
 				async execute(interaction: any) {
+				if (!interaction.member.roles.cache.has(memberRoleId)) {
+				return interaction.reply('You do not have the required role to use this command.');
+				}
 					let serverType: string;
 					let port: number;
 					let password: string;

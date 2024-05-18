@@ -17,7 +17,8 @@ const {
   cmpPort,
   smpIp,
   smpPassword,
-  smpPort
+  smpPort,
+  memberRoleId
 } = require('../../../config.json')
 
 const spawnSubs: choiceArray = [
@@ -122,6 +123,9 @@ module.exports = {
         )
     ),
   async execute(interaction: any) {
+    if (!interaction.member.roles.cache.has(memberRoleId)) {
+    return interaction.reply('You do not have the required role to use this command.');
+    }
     const isSMP: boolean = interaction.options.getString('server') == 'smp'
     const serverType: string = isSMP ? smpIp : cmpIp
     const password: string = isSMP ? smpPassword : cmpPassword

@@ -2,12 +2,10 @@ import { SlashCommandBuilder } from 'discord.js'
 import { runRconCommand } from '../../rcon/rcon'
 import {
   createStringOptionWithChoices,
-  colours,
   choiceArray,
-  createSimpleSubcommand,
   createStringOption
 } from '../../utils/CommandUtils'
-const { cmpIp, cmpPassword, cmpPort } = require('../../../config.json')
+const { cmpIp, cmpPassword, cmpPort, memberRoleId } = require('../../../config.json')
 
 const subcommands: choiceArray = [
    {name: "status", value: "status"},
@@ -49,6 +47,9 @@ module.exports = {
       .addStringOption(createStringOptionWithChoices('sub', 'subcommands of tick freeze', true, ...subcommands))
     ),
   async execute(interaction: any) {
+    if (!interaction.member.roles.cache.has(memberRoleId)) {
+    return interaction.reply('You do not have the required role to use this command.');
+    }
     let serverType: string = cmpIp
     let port: number = cmpPort
     let password: string = cmpPassword

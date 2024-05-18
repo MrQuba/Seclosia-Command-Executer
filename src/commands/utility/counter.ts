@@ -1,8 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js'
-import { changePermissionForPlayer, runRconCommand } from '../../rcon/rcon'
+import { runRconCommand } from '../../rcon/rcon'
 import {
   createStringOptionWithChoices,
-  createChoiceSubcommand,
   colours,
   choiceArray
 } from '../../utils/CommandUtils'
@@ -10,7 +9,7 @@ const action: choiceArray = [
   { name: 'Reset', value: 'reset' },
   { name: 'Realtime', value: 'realtime' }
 ]
-const { cmpIp, cmpPassword, cmpPort } = require('../../../config.json')
+const { cmpIp, cmpPassword, cmpPort, memberRoleId } = require('../../../config.json')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('counter')
@@ -32,6 +31,9 @@ module.exports = {
       )
     ),
   async execute(interaction: any) {
+    if (!interaction.member.roles.cache.has(memberRoleId)) {
+    return interaction.reply('You do not have the required role to use this command.');
+    }
     let serverType: string = cmpIp
     let port: number = cmpPort
     let password: string = cmpPassword
