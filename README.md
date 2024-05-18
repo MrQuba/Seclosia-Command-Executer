@@ -28,6 +28,6 @@ Inside put
 	"cmp2Port":  port of server 3 (default 25575),
 	"rconPort": this can be probably ignored, as it was used for testing,
 	"rconPassword": "this can be probably ignored, as it was used for testing",
-	"memberRoleId": "1241352177377873961"
+	"memberRoleId": "role id for executing commands"
 }
 ```
